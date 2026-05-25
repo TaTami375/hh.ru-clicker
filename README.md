@@ -117,17 +117,7 @@
 
 ## Быстрый старт
 
-### Docker (рекомендуется)
-
-```bash
-git clone <repo>
-cd hh.ru-clicker
-docker-compose up -d
-```
-
-Открыть: http://localhost:8000
-
-### Локально (Python)
+### Локально (разработка)
 
 ```bash
 git clone <repo>
@@ -137,6 +127,69 @@ python web_app.py
 ```
 
 Открыть: http://localhost:8000
+
+---
+
+## Деплой на VPS (продакшн)
+
+### 1. Настроить переменные окружения
+
+```bash
+cp .env.example .env
+# Сгенерировать надёжный пароль:
+python3 -c "import secrets; print(secrets.token_urlsafe(32))"
+# Вставить результат в .env как DASHBOARD_PASSWORD=...
+nano .env
+```
+
+### 2. Получить SSL-сертификат
+
+**Вариант A — Let's Encrypt (рекомендуется):**
+```bash
+apt install certbot
+certbot certonly --standalone -d ваш.домен.ru
+cp /etc/letsencrypt/live/ваш.домен.ru/fullchain.pem ./nginx/certs/
+cp /etc/letsencrypt/live/ваш.домен.ru/privkey.pem   ./nginx/certs/
+```
+
+**Вариант B — самоподписанный (только для теста):**
+```bash
+mkdir -p nginx/certs
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+  -keyout nginx/certs/privkey.pem \
+  -out nginx/certs/fullchain.pem \
+  -subj "/CN=localhost"
+```
+
+### 3. Запустить
+
+```bash
+docker-compose up -d
+```
+
+Открыть: `https://ваш.домен.ru` — браузер запросит логин/пароль (Basic Auth).
+
+### 4. Настроить автообновление сертификата (certbot)
+
+```bash
+# Добавить в crontab:
+0 3 * * * certbot renew --quiet && \
+  cp /etc/letsencrypt/live/ваш.домен.ru/fullchain.pem /путь/к/проекту/nginx/certs/ && \
+  cp /etc/letsencrypt/live/ваш.домен.ru/privkey.pem   /путь/к/проекту/nginx/certs/ && \
+  docker-compose restart nginx
+```
+
+### Архитектура деплоя
+
+```
+Интернет → nginx (443/TLS) → hh-bot:8000 (127.0.0.1 only)
+```
+
+- **nginx** — единственная точка входа, TLS-терминация, security-заголовки
+- **hh-bot** — слушает только `127.0.0.1:8000`, недоступен из интернета напрямую
+- **Basic Auth** — защита всех HTTP-запросов
+- **WS-токен** — WebSocket аутентифицируется через `sha256(password)` в query-параметре
+- **data/** — монтируется как volume, исходный код не монтируется в prod
 
 ---
 

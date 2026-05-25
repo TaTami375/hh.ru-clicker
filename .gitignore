@@ -1,6 +1,12 @@
 # Данные пользователя
 data/
 
+# Секреты — никогда не коммитить
+.env
+nginx/certs/*.pem
+nginx/certs/*.key
+nginx/certs/*.crt
+
 # Python
 __pycache__/
 *.py[cod]

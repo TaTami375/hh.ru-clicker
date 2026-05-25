@@ -21,7 +21,10 @@ router = APIRouter()
 
 @router.on_event("startup")
 async def startup():
+    import os
     from app.config import load_accounts
+    if not os.environ.get("DASHBOARD_PASSWORD"):
+        log_debug("⚠️  ВНИМАНИЕ: DASHBOARD_PASSWORD не задан — дашборд открыт без пароля!")
     load_accounts()
     bot.start()
     asyncio.create_task(broadcast_loop())

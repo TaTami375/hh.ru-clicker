@@ -3,4 +3,5 @@ from app.routes import app
 import uvicorn
 
 if __name__ == "__main__":
+    # 0.0.0.0 — нужно для Docker (Traefik/Dokploy проксирует снаружи)
     uvicorn.run(app, host="0.0.0.0", port=8000, log_level="info")

@@ -1,0 +1,17 @@
+services:
+  hh-bot:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - hh-bot-data:/app/data
+    environment:
+      - DASHBOARD_PASSWORD=${DASHBOARD_PASSWORD}
+      - DEBUG_MODE=false
+      - DISABLE_SSL_VERIFY=
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+
+volumes:
+  hh-bot-data:

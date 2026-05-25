@@ -2,3 +2,8 @@ data/
 __pycache__/
 *.pyc
 .git/
+.env
+nginx/
+*.pem
+*.key
+*.crt

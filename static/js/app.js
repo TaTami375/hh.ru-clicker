@@ -1704,9 +1704,17 @@ function applySettings() {
 }
 
 // ── WebSocket ──────────────────────────────────────────────────
-function connect() {
+async function connect() {
   const proto = location.protocol === 'https:' ? 'wss' : 'ws';
-  const ws = new WebSocket(`${proto}://${location.host}/ws`);
+  let wsUrl = `${proto}://${location.host}/ws`;
+  try {
+    const r = await fetch('/api/ws_token');
+    if (r.ok) {
+      const data = await r.json();
+      if (data.token) wsUrl += `?token=${encodeURIComponent(data.token)}`;
+    }
+  } catch(e) { /* нет токена — подключаемся без него (dev-режим) */ }
+  const ws = new WebSocket(wsUrl);
   State.ws = ws;
 
   ws.onopen = () => {
