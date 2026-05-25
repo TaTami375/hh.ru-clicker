@@ -16,7 +16,7 @@ import requests
 from app.logging_utils import log_debug, _is_login_page
 
 from app.config import (
-    CONFIG, accounts_data,
+    CONFIG, SSL_VERIFY, make_ssl_context, accounts_data,
     save_config, load_config, save_accounts, load_accounts,
     _url_entry, _url_pages_map,
 )
@@ -899,7 +899,7 @@ class BotManager:
                         "X-Xsrftoken": acc.get("cookies", {}).get("_xsrf", ""),
                         "Referer": "https://hh.ru/applicant/negotiations",
                     },
-                    cookies=acc.get("cookies", {}), verify=False, timeout=10,
+                    cookies=acc.get("cookies", {}), verify=SSL_VERIFY, timeout=10,
                 )
                 if r_offers.status_code == 200:
                     offers_data = r_offers.json()
@@ -1277,11 +1277,7 @@ class BotManager:
         headers = get_headers(xsrf)
         sem = asyncio.Semaphore(CONFIG.max_concurrent * 3)
 
-        ssl_context = ssl.create_default_context()
-        ssl_context.check_hostname = False
-        ssl_context.verify_mode = ssl.CERT_NONE
-
-        connector = aiohttp.TCPConnector(ssl=ssl_context, limit=CONFIG.max_concurrent * 3)
+        connector = aiohttp.TCPConnector(ssl=make_ssl_context(), limit=CONFIG.max_concurrent * 3)
 
         all_tasks = []
         url_pages = _url_pages_map()

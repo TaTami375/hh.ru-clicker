@@ -4,13 +4,13 @@ Manual vacancy apply flow (two-step: check + submit).
 
 import json
 import re
-import ssl
 
 import aiohttp
 from fastapi import APIRouter
 from glom import glom
 
 from app.logging_utils import _is_login_page
+from app.config import make_ssl_context
 from app.storage import add_applied
 from app.hh_api import get_headers
 from app.questionnaire import get_questionnaire_answer
@@ -25,10 +25,7 @@ async def _fetch_questionnaire_data(acc: dict, vid: str) -> dict:
     Получает форму опросника и возвращает список вопросов с полями.
     НЕ отправляет отклик.
     """
-    ssl_ctx = ssl.create_default_context()
-    ssl_ctx.check_hostname = False
-    ssl_ctx.verify_mode = ssl.CERT_NONE
-    connector = aiohttp.TCPConnector(ssl=ssl_ctx)
+    connector = aiohttp.TCPConnector(ssl=make_ssl_context())
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
         "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
@@ -147,13 +144,10 @@ async def api_apply_check(body: dict):
     if custom_letter:
         acc["letter"] = custom_letter
 
-    ssl_ctx = ssl.create_default_context()
-    ssl_ctx.check_hostname = False
-    ssl_ctx.verify_mode = ssl.CERT_NONE
     try:
         async with aiohttp.ClientSession(
             cookies=acc["cookies"],
-            connector=aiohttp.TCPConnector(ssl=ssl_ctx),
+            connector=aiohttp.TCPConnector(ssl=make_ssl_context()),
             headers=get_headers(acc.get("cookies", {}).get("_xsrf", ""))
         ) as session:
             data = aiohttp.FormData()
@@ -222,15 +216,12 @@ async def api_apply_submit(body: dict):
     if letter:
         acc = {**acc, "letter": letter}
 
-    ssl_ctx = ssl.create_default_context()
-    ssl_ctx.check_hostname = False
-    ssl_ctx.verify_mode = ssl.CERT_NONE
     url_form = f"https://hh.ru/applicant/vacancy_response?vacancyId={vid}&withoutTest=no"
 
     try:
         async with aiohttp.ClientSession(
             cookies=acc["cookies"],
-            connector=aiohttp.TCPConnector(ssl=ssl_ctx),
+            connector=aiohttp.TCPConnector(ssl=make_ssl_context()),
             headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
                      "Accept": "text/html,*/*", "Referer": f"https://hh.ru/vacancy/{vid}"}
         ) as session:

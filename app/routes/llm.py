@@ -8,7 +8,7 @@ import requests
 from fastapi import APIRouter, Request
 
 from app.logging_utils import log_debug
-from app.config import CONFIG, save_config
+from app.config import CONFIG, SSL_VERIFY, save_config
 from app.instances import bot
 
 
@@ -161,7 +161,7 @@ async def api_llm_detect(request: Request):
         resp = requests.get(
             f"{base_url.rstrip('/')}/models",
             headers={"Authorization": f"Bearer {api_key}"},
-            timeout=12, verify=False,
+            timeout=12, verify=SSL_VERIFY,
         )
         if resp.status_code != 200:
             return {"ok": False, "base_url": base_url, "error": f"HTTP {resp.status_code}: {resp.text[:200]}"}

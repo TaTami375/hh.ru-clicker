@@ -9,9 +9,17 @@ COPY web_app.py .
 COPY app/ app/
 COPY static/ static/
 
-# Папка data монтируется через volume (см. docker-compose.yml)
-RUN mkdir -p data
+# Папка data монтируется через volume
+RUN mkdir -p data \
+    && addgroup --system appgroup \
+    && adduser --system --ingroup appgroup appuser \
+    && chown -R appuser:appgroup /app
+
+USER appuser
 
 EXPOSE 8000
+
+HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
+    CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/')" || exit 1
 
 CMD ["python", "web_app.py"]

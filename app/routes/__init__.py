@@ -2,9 +2,12 @@
 FastAPI app creation and route registration.
 """
 
+import base64
+import os
+import secrets
 from pathlib import Path
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request, Response
 from fastapi.staticfiles import StaticFiles
 
 # Singleton bot/manager are created in app.instances so every router module
@@ -12,6 +15,28 @@ from fastapi.staticfiles import StaticFiles
 from app.instances import bot, manager  # re-exported for back-compat
 
 app = FastAPI(title="HH Bot Dashboard")
+
+_DASHBOARD_PASSWORD = os.environ.get("DASHBOARD_PASSWORD", "")
+
+
+@app.middleware("http")
+async def basic_auth_middleware(request: Request, call_next):
+    if not _DASHBOARD_PASSWORD:
+        return await call_next(request)
+    auth = request.headers.get("Authorization", "")
+    if auth.startswith("Basic "):
+        try:
+            decoded = base64.b64decode(auth[6:]).decode("utf-8", errors="replace")
+            _, _, pwd = decoded.partition(":")
+            if secrets.compare_digest(pwd, _DASHBOARD_PASSWORD):
+                return await call_next(request)
+        except Exception:
+            pass
+    return Response(
+        status_code=401,
+        headers={"WWW-Authenticate": 'Basic realm="HH Bot Dashboard"'},
+        content="Unauthorized",
+    )
 
 STATIC_DIR = Path("static")
 STATIC_DIR.mkdir(exist_ok=True)

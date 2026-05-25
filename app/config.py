@@ -3,10 +3,24 @@ Configuration: Config class, accounts_data, save/load functions, URL helpers.
 """
 
 import json
+import os
 import threading
 from pathlib import Path
 
 from app.logging_utils import log_debug
+
+SSL_VERIFY = os.environ.get("DISABLE_SSL_VERIFY", "").lower() not in ("1", "true", "yes")
+
+
+def make_ssl_context():
+    """Return ssl.SSLContext respecting SSL_VERIFY env flag (for aiohttp)."""
+    import ssl as _ssl
+    ctx = _ssl.create_default_context()
+    if not SSL_VERIFY:
+        ctx.check_hostname = False
+        ctx.verify_mode = _ssl.CERT_NONE
+    return ctx
+
 
 DATA_DIR = Path("data")
 DATA_DIR.mkdir(exist_ok=True)

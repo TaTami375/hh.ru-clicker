@@ -4,14 +4,13 @@ HH.ru apply functions: send response, fill questionnaire, check vacancy, check l
 
 import re
 import json
-import ssl
 import requests
 import aiohttp
 
 from glom import glom
 
 from app.logging_utils import log_debug, _is_login_page
-from app.config import CONFIG
+from app.config import CONFIG, SSL_VERIFY, make_ssl_context
 from app.hh_api import get_headers
 from app.oauth import _oauth_touch_resume
 from app.questionnaire import _parse_questionnaire_fields, _parse_questionnaire_rich, get_questionnaire_answer
@@ -44,11 +43,7 @@ async def send_response_async(acc: dict, vid: str) -> tuple:
     data.add_field("lux", "true")
     data.add_field("ignore_postponed", "true")
 
-    ssl_context = ssl.create_default_context()
-    ssl_context.check_hostname = False
-    ssl_context.verify_mode = ssl.CERT_NONE
-
-    connector = aiohttp.TCPConnector(ssl=ssl_context)
+    connector = aiohttp.TCPConnector(ssl=make_ssl_context())
 
     try:
         async with aiohttp.ClientSession(headers=headers, cookies=acc["cookies"], connector=connector) as session:
@@ -129,10 +124,7 @@ async def fill_and_submit_questionnaire(acc: dict, vid: str,
     Поддерживает textarea, radio, checkbox.
     Возвращает (result, info): result = sent | limit | test | error
     """
-    ssl_ctx = ssl.create_default_context()
-    ssl_ctx.check_hostname = False
-    ssl_ctx.verify_mode = ssl.CERT_NONE
-    connector = aiohttp.TCPConnector(ssl=ssl_ctx)
+    connector = aiohttp.TCPConnector(ssl=make_ssl_context())
 
     headers_get = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
@@ -264,7 +256,7 @@ def _check_vacancy_before_apply(acc: dict, vid: str) -> dict:
             headers={"User-Agent": ua, "Accept": "application/json, */*",
                      "Referer": f"https://hh.ru/vacancy/{vid}"},
             cookies=acc.get("cookies", {}),
-            timeout=10, verify=False,
+            timeout=10, verify=SSL_VERIFY,
         )
         if r.status_code not in (200,):
             return {"ok": True, "reason": ""}  # can't check, allow
@@ -320,7 +312,7 @@ def check_limit(acc: dict) -> bool:
             "https://hh.ru/search/vacancy?text=&area=1&page=0",
             headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
                      "Accept": "text/html"},
-            cookies=acc["cookies"], verify=False, timeout=10,
+            cookies=acc["cookies"], verify=SSL_VERIFY, timeout=10,
         )
         vids = re.findall(r'/vacancy/(\d+)', r_search.text)
         if not vids:
@@ -331,7 +323,7 @@ def check_limit(acc: dict) -> bool:
             f"https://hh.ru/applicant/vacancy_response/popup?vacancyId={vid}",
             headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
                      "Accept": "application/json", "X-Xsrftoken": xsrf},
-            cookies=acc["cookies"], verify=False, timeout=10,
+            cookies=acc["cookies"], verify=SSL_VERIFY, timeout=10,
         )
         return "negotiations-limit-exceeded" in r.text
     except Exception:

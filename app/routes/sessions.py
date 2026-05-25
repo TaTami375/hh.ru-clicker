@@ -7,7 +7,7 @@ import asyncio
 import requests
 from fastapi import APIRouter, Request
 
-from app.config import accounts_data
+from app.config import accounts_data, SSL_VERIFY
 from app.storage import save_browser_sessions
 from app.hh_resume import parse_hh_lux_ssr
 from app.instances import bot
@@ -32,7 +32,7 @@ def _validate_and_profile(raw_cookie_line: str) -> dict:
         r = requests.get(
             "https://hh.ru/applicant/resumes",
             headers=headers,
-            verify=False,
+            verify=SSL_VERIFY,
             timeout=15,
             allow_redirects=True,
         )

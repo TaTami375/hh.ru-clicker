@@ -4,14 +4,20 @@ Debug endpoints for inspecting HH SSR, chats, and account state.
 
 import asyncio
 import json
+import os
 import re
 
 import requests
 from fastapi import APIRouter
+from fastapi.responses import JSONResponse
+
+from app.config import SSL_VERIFY
 
 from app.hh_chat import fetch_negotiation_thread
 from app.hh_resume import parse_hh_lux_ssr
 from app.instances import bot
+
+_DEBUG_MODE = os.environ.get("DEBUG_MODE", "").lower() in ("1", "true", "yes")
 
 
 router = APIRouter()
@@ -19,6 +25,8 @@ router = APIRouter()
 
 @router.get("/api/debug/session/{idx}")
 async def api_debug_session(idx: int):
+    if not _DEBUG_MODE:
+        return JSONResponse(status_code=404, content={"detail": "Not found"})
     """Показать SSR структуру для браузерной сессии (для отладки resume_hash)."""
     temp_idx = idx - len(bot.account_states)
     if temp_idx < 0 or temp_idx >= len(bot.temp_sessions):
@@ -34,7 +42,7 @@ async def api_debug_session(idx: int):
     }
     loop = asyncio.get_event_loop()
     def _fetch():
-        r = requests.get("https://hh.ru/applicant/resumes", headers=headers, verify=False, timeout=15)
+        r = requests.get("https://hh.ru/applicant/resumes", headers=headers, verify=SSL_VERIFY, timeout=15)
         ssr = parse_hh_lux_ssr(r.text)
         preview = {}
         for k, v in ssr.items():
@@ -51,6 +59,8 @@ async def api_debug_session(idx: int):
 
 @router.get("/api/debug")
 async def api_debug():
+    if not _DEBUG_MODE:
+        return JSONResponse(status_code=404, content={"detail": "Not found"})
     snap = bot.get_state_snapshot()
     return {
         "temp_sessions_count": len(bot.temp_sessions),
@@ -67,6 +77,8 @@ async def api_debug():
 
 @router.get("/api/debug/neg_ids/{idx}")
 async def api_debug_neg_ids(idx: int):
+    if not _DEBUG_MODE:
+        return JSONResponse(status_code=404, content={"detail": "Not found"})
     """Принудительно вызвать fetch_hh_negotiations_stats для аккаунта и вернуть neg_ids + sample hrefs."""
     if idx < len(bot.account_states):
         state = bot.account_states[idx]
@@ -125,6 +137,8 @@ async def api_debug_neg_ids(idx: int):
 
 @router.get("/api/debug/thread/{idx}/{chat_id}")
 async def api_debug_thread(idx: int, chat_id: str):
+    if not _DEBUG_MODE:
+        return JSONResponse(status_code=404, content={"detail": "Not found"})
     """Test fetch_negotiation_thread for a given chatId using account idx."""
     if idx < len(bot.account_states):
         state = bot.account_states[idx]
@@ -140,6 +154,8 @@ async def api_debug_thread(idx: int, chat_id: str):
 
 @router.get("/api/debug/thread_raw/{idx}/{chat_id}")
 async def api_debug_thread_raw(idx: int, chat_id: str):
+    if not _DEBUG_MODE:
+        return JSONResponse(status_code=404, content={"detail": "Not found"})
     """Return raw JSON structure from /chat/messages?chatId=... for debugging."""
     if idx < len(bot.account_states):
         state = bot.account_states[idx]
