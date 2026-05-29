@@ -195,6 +195,15 @@ const T = {
     // Cookies section
     ck_desc: 'Вставьте новый cURL или строку cookie: hhtoken=…',
     btn_update_cookies: '🔑 Обновить куки',
+    // Autologin
+    autologin_section: '🔐 Авто-логин',
+    autologin_login_ph: 'Email или телефон',
+    autologin_password_ph: 'Пароль',
+    btn_save_credentials: '💾 Сохранить',
+    btn_autologin: '🔄 Войти и обновить куки',
+    autologin_hint: 'Если куки протухнут, бот войдёт автоматически',
+    cookies_expired_badge: '⚠️ Куки протухли!',
+    btn_autologin_badge: '🔄 Авто-логин',
     // Sessions
     sess_add: '➕ Добавить сессию из браузера',
     sess_mode_curl: 'cURL / строка',
@@ -428,6 +437,15 @@ const T = {
     // Cookies section
     ck_desc: 'Paste new cURL or cookie string: hhtoken=…',
     btn_update_cookies: '🔑 Update cookies',
+    // Autologin
+    autologin_section: '🔐 Auto-login',
+    autologin_login_ph: 'Email or phone',
+    autologin_password_ph: 'Password',
+    btn_save_credentials: '💾 Save',
+    btn_autologin: '🔄 Login & refresh cookies',
+    autologin_hint: 'If cookies expire, bot will re-login automatically',
+    cookies_expired_badge: '⚠️ Cookies expired!',
+    btn_autologin_badge: '🔄 Auto-login',
     // Sessions
     sess_add: '➕ Add browser session',
     sess_mode_curl: 'cURL / string',
@@ -1661,9 +1679,20 @@ function buildAccCookiesList(snap) {
       `<div style="font-size:12px;font-weight:600;margin-bottom:6px;${colorStyle}">${esc(acc.name)}</div>` +
       `<textarea id="ck-ta-${acc.idx}" class="apply-input" rows="2" style="font-size:11px;margin-bottom:6px" ` +
         `placeholder="curl 'https://hh.ru/...' -H 'cookie: hhtoken=...' ...&#10;— или: hhtoken=xxx; _xsrf=yyy; hhul=zzz; crypted_id=aaa"></textarea>` +
-      `<div style="display:flex;gap:8px;align-items:center">` +
+      `<div style="display:flex;gap:8px;align-items:center;margin-bottom:10px">` +
         `<button class="btn-sm" onclick="updateAccCookies(${acc.idx})">${t('btn_update_cookies')}</button>` +
         `<span id="ck-st-${acc.idx}" style="font-size:11px;color:var(--dim)"></span>` +
+      `</div>` +
+      `<div style="font-size:11px;font-weight:600;margin-bottom:4px;color:var(--cyan)">${t('autologin_section')}</div>` +
+      `<div style="font-size:11px;color:var(--dim);margin-bottom:6px">${t('autologin_hint')}</div>` +
+      `<div style="display:flex;gap:6px;margin-bottom:6px">` +
+        `<input id="al-login-${acc.idx}" class="apply-input" type="text" style="font-size:11px;flex:1" placeholder="${t('autologin_login_ph')}">` +
+        `<input id="al-pass-${acc.idx}" class="apply-input" type="password" style="font-size:11px;flex:1" placeholder="${t('autologin_password_ph')}">` +
+      `</div>` +
+      `<div style="display:flex;gap:8px;align-items:center">` +
+        `<button class="btn-sm" onclick="saveCredentials(${acc.idx})">${t('btn_save_credentials')}</button>` +
+        `<button class="btn-sm" onclick="doAutologin(${acc.idx},this)">${t('btn_autologin')}</button>` +
+        `<span id="al-st-${acc.idx}" style="font-size:11px;color:var(--dim)"></span>` +
       `</div>`;
     el.appendChild(div);
   });
@@ -1690,6 +1719,63 @@ async function updateAccCookies(idx) {
     }
   } catch(e) {
     if (st) { st.textContent = '❌ ' + e; st.style.color = 'var(--red)'; }
+  }
+}
+
+async function saveCredentials(idx) {
+  const loginEl = document.getElementById('al-login-' + idx);
+  const passEl  = document.getElementById('al-pass-' + idx);
+  const st      = document.getElementById('al-st-' + idx);
+  const login    = loginEl?.value.trim();
+  const password = passEl?.value.trim();
+  if (!login && !password) {
+    if (st) { st.textContent = '❌ Заполните поля'; st.style.color = 'var(--red)'; }
+    return;
+  }
+  if (st) { st.textContent = '⏳ Сохраняю...'; st.style.color = 'var(--dim)'; }
+  try {
+    const res = await fetch(`/api/account/${idx}/credentials`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({hh_login: login, hh_password: password})
+    });
+    const data = await res.json();
+    if (data.ok) {
+      if (st) { st.textContent = '✅ Сохранено'; st.style.color = 'var(--green)'; }
+      if (loginEl && login) loginEl.value = '';
+      if (passEl && password) passEl.value = '';
+    } else {
+      if (st) { st.textContent = '❌ ' + (data.error || 'Ошибка'); st.style.color = 'var(--red)'; }
+    }
+  } catch(e) {
+    if (st) { st.textContent = '❌ ' + e; st.style.color = 'var(--red)'; }
+  } finally {
+    setTimeout(() => { if (st) st.textContent = ''; }, 4000);
+  }
+}
+
+async function doAutologin(idx, btn) {
+  const st      = document.getElementById('al-st-' + idx);
+  const badgeSt = document.getElementById('acc-al-badge-st-' + idx);
+  const setStatus = (msg, color) => {
+    if (st)      { st.textContent = msg;      st.style.color = color; }
+    if (badgeSt) { badgeSt.textContent = msg; badgeSt.style.color = color; }
+  };
+  if (btn) btn.disabled = true;
+  setStatus('⏳ Входим...', 'var(--dim)');
+  try {
+    const res = await fetch(`/api/account/${idx}/autologin`, {method: 'POST'});
+    const data = await res.json();
+    if (data.ok) {
+      setStatus(`✅ Куки обновлены (${(data.keys||[]).length})`, 'var(--green)');
+    } else {
+      setStatus('❌ ' + (data.error || 'Ошибка'), 'var(--red)');
+    }
+  } catch(e) {
+    setStatus('❌ ' + e, 'var(--red)');
+  } finally {
+    if (btn) btn.disabled = false;
+    setTimeout(() => { setStatus('', 'var(--dim)'); }, 5000);
   }
 }
 
@@ -2008,7 +2094,11 @@ function buildCardHTML(acc) {
     <div class="acc-history" id="acc-hist-${acc.idx}"></div>
     <div class="acc-event-log" id="acc-elog-${acc.idx}"></div>
     <div id="acc-errbadge-${acc.idx}" style="display:none;font-size:11px;padding:2px 0;margin-bottom:2px"></div>
-    <div id="acc-cookiesbadge-${acc.idx}" class="cookies-expired-badge" style="display:none">${t('cookies_expired_badge')}</div>
+    <div id="acc-cookiesbadge-${acc.idx}" class="cookies-expired-badge" style="display:none">
+      ${t('cookies_expired_badge')}
+      <button class="btn-sm" style="margin-left:8px;font-size:10px" onclick="doAutologin(${acc.idx},this)">${t('btn_autologin_badge')}</button>
+      <span id="acc-al-badge-st-${acc.idx}" style="font-size:10px;margin-left:4px"></span>
+    </div>
     <label class="acc-skip-tests${acc.apply_tests ? ' active' : ''}" id="acc-apply-label-${acc.idx}">
       <input type="checkbox" id="acc-apply-cb-${acc.idx}" ${acc.apply_tests ? 'checked' : ''}
         onchange="applyTestsToggle(${acc.idx}, this)">

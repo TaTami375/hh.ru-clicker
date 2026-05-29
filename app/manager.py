@@ -32,6 +32,8 @@ from app.oauth import (
     _oauth_apply,
 )
 
+from app.hh_auth import login_and_get_cookies
+
 from app.hh_api import (
     get_headers, parse_ids, parse_vacancy_meta, parse_salaries,
     parse_work_schedules, extract_search_query,
@@ -189,6 +191,12 @@ class BotManager:
         except Exception as e:
             log_debug(f"Failed to load recent responses: {e}")
         self.account_states = [AccountState(acc) for acc in accounts_data]
+        # Autologin at startup for accounts that have credentials but no cookies
+        for state in self.account_states:
+            acc = state.acc
+            if not acc.get("cookies", {}).get("hhtoken") and acc.get("hh_login") and acc.get("hh_password"):
+                log_debug(f"start(): no cookies for {state.name}, attempting autologin")
+                self._try_autologin(state)
         for i, state in enumerate(self.account_states):
             t1 = threading.Thread(
                 target=self._run_account_worker, args=(i, state), daemon=True
@@ -333,6 +341,45 @@ class BotManager:
                 f"⛔ Авто-пауза: {n} ошибок подряд. Снимите вручную.",
                 "error",
             )
+
+    def _try_autologin(self, state: AccountState) -> bool:
+        """
+        Attempt to re-login and refresh cookies for the account.
+        Returns True if successful, False otherwise.
+        """
+        acc = state.acc
+        login = acc.get("hh_login", "").strip()
+        password = acc.get("hh_password", "").strip()
+        if not login or not password:
+            return False
+        self._add_log(
+            state.short, state.color,
+            "🔄 Авто-логин: пробуем войти заново…", "info",
+        )
+        try:
+            cookies = login_and_get_cookies(login, password)
+        except Exception as e:
+            log_debug(f"_try_autologin [{state.name}]: exception: {e}")
+            cookies = None
+        if cookies and "hhtoken" in cookies:
+            acc["cookies"] = cookies
+            state.acc["cookies"] = cookies
+            state.cookies_expired = False
+            save_accounts()
+            self._add_log(
+                state.short, state.color,
+                "✅ Авто-логин: куки обновлены!", "success",
+            )
+            log_debug(f"_try_autologin [{state.name}]: OK, keys={list(cookies.keys())}")
+            return True
+        else:
+            self._add_log(
+                state.short, state.color,
+                "❌ Авто-логин не удался (капча или неверные данные). Обновите куки вручную.",
+                "error",
+            )
+            log_debug(f"_try_autologin [{state.name}]: failed")
+            return False
 
     def _add_response(
         self,
@@ -795,6 +842,17 @@ class BotManager:
             state.vacancy_salaries = salary_map
             state.vacancy_schedules = schedule_map
 
+            # If login page was detected during collection — try autologin
+            if state.cookies_expired:
+                if self._try_autologin(state):
+                    continue  # Retry cycle with fresh cookies
+                state.paused = True
+                self._add_log(
+                    state.short, state.color,
+                    "⚠️ Куки протухли! Обновите куки и снимите паузу.", "error",
+                )
+                continue
+
             all_vacancies = []
             for url in effective_urls:
                 url_vacancies = results_by_url.get(url, set())
@@ -1216,6 +1274,9 @@ class BotManager:
                             self._check_auto_pause(state)
                         else:
                             state.cookies_expired = True
+                            if self._try_autologin(state):
+                                # Cookies refreshed — continue cycle from beginning
+                                break
                             state.paused = True
                             self._add_log(
                                 state.short, state.color,
@@ -1734,10 +1795,11 @@ class BotManager:
                 stats = fetch_hh_negotiations_stats(state.acc)
                 if stats.get("auth_error"):
                     state.cookies_expired = True
-                    self._add_log(
-                        state.short, state.color,
-                        "⚠️ Куки протухли! (HH stats) Обновите куки.", "error",
-                    )
+                    if not self._try_autologin(state):
+                        self._add_log(
+                            state.short, state.color,
+                            "⚠️ Куки протухли! (HH stats) Обновите куки.", "error",
+                        )
                     state.hh_stats_loading = False
                     self._stop_event.wait(max(CONFIG.llm_check_interval * 60, 120))
                     continue

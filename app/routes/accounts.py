@@ -26,6 +26,7 @@ from app.hh_resume import (
     _resume_cache,
 )
 from app.hh_negotiations import auto_decline_discards
+from app.hh_auth import login_and_get_cookies
 from app.state import AccountState
 from app.config import CONFIG
 from app.instances import bot
@@ -225,6 +226,56 @@ async def api_account_profile(idx: int, request: Request):
         state.color = acc.get("color", state.color)
     save_accounts()
     return {"ok": True}
+
+
+@router.post("/api/account/{idx}/credentials")
+async def api_account_credentials(idx: int, request: Request):
+    """Сохранить логин/пароль аккаунта (для авто-логина)."""
+    body = await request.json()
+    login = body.get("hh_login", "").strip()
+    password = body.get("hh_password", "").strip()
+    if not (0 <= idx < len(accounts_data)):
+        return {"ok": False, "error": "Аккаунт не найден"}
+    acc = accounts_data[idx]
+    if login:
+        acc["hh_login"] = login
+    if password:
+        acc["hh_password"] = password
+    if login or password:
+        save_accounts()
+    return {"ok": True}
+
+
+@router.post("/api/account/{idx}/autologin")
+async def api_account_autologin(idx: int):
+    """Выполнить авто-логин на hh.ru и обновить куки аккаунта."""
+    if not (0 <= idx < len(accounts_data)):
+        return {"ok": False, "error": "Аккаунт не найден"}
+    acc = accounts_data[idx]
+    login = acc.get("hh_login", "").strip()
+    password = acc.get("hh_password", "").strip()
+    if not login or not password:
+        return {"ok": False, "error": "Логин/пароль не заданы. Сохраните их сначала."}
+
+    loop = asyncio.get_event_loop()
+    cookies = await loop.run_in_executor(None, login_and_get_cookies, login, password)
+
+    if cookies is None:
+        return {"ok": False, "error": "Авто-логин не удался (капча или неверные данные)"}
+    if "hhtoken" not in cookies:
+        return {"ok": False, "error": "Не удалось получить hhtoken"}
+
+    acc["cookies"] = cookies
+    if 0 <= idx < len(bot.account_states):
+        state = bot.account_states[idx]
+        state.acc["cookies"] = cookies
+        state.cookies_expired = False
+        if state.paused and not state.hard_stopped:
+            state.paused = False
+    save_accounts()
+    name = acc.get("name", f"#{idx}")
+    log_debug(f"autologin [{name}]: OK, cookies={list(cookies.keys())}")
+    return {"ok": True, "name": name, "keys": list(cookies.keys())}
 
 
 @router.post("/api/accounts/add")
