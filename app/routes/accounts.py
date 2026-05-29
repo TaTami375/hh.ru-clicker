@@ -57,11 +57,20 @@ def _parse_cookies_str(raw: str) -> tuple:
     raw = raw.encode().decode('unicode_escape', errors='replace') if '\\u00' in raw else raw
 
     if raw.startswith("curl "):
-        m = re.search(r"-H\s+['\"](?:C|c)ookie:\s*([^'\"]+)['\"]", raw, re.DOTALL)
+        # -H 'Cookie: ...' or -H "Cookie: ..."  (single-quoted: allow " inside; double-quoted: allow ' inside)
+        m = re.search(r"-H\s+'(?:C|c)ookie:\s*([^']+)'", raw, re.DOTALL)
         if not m:
-            m = re.search(r"-b\s+\$?['\"]([^'\"]+)['\"]", raw, re.DOTALL)
+            m = re.search(r'-H\s+"(?:C|c)ookie:\s*([^"]+)"', raw, re.DOTALL)
+        # -b '...' or -b "..."
         if not m:
-            m = re.search(r"--cookie\s+['\"]([^'\"]+)['\"]", raw, re.DOTALL)
+            m = re.search(r"-b\s+\$?'([^']+)'", raw, re.DOTALL)
+        if not m:
+            m = re.search(r'-b\s+\$?"([^"]+)"', raw, re.DOTALL)
+        # --cookie '...' or --cookie "..."
+        if not m:
+            m = re.search(r"--cookie\s+'([^']+)'", raw, re.DOTALL)
+        if not m:
+            m = re.search(r'--cookie\s+"([^"]+)"', raw, re.DOTALL)
         if m:
             raw_line = m.group(1).strip()
         else:
