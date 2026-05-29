@@ -4,46 +4,50 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>HH Bot Dashboard</title>
-<link rel="stylesheet" href="/static/css/style.css">
+<link rel="stylesheet" href="./css/style.css">
 </head>
 <body>
 
 <!-- Header -->
 <div id="header">
   <div id="conn-dot" title="WebSocket connection"></div>
-  <h1>🤖 HH Bot Dashboard</h1>
+  <h1>HH Bot Dashboard</h1>
   <div style="color:var(--dim);font-size:11px">
-    🔍 <span id="global-found">0</span> <span data-i18n="hdr_found">найдено</span> &nbsp;
-    ✅ <span id="global-sent">0</span> <span data-i18n="hdr_replies">откликов</span>
+    <span id="global-found">0</span> <span data-i18n="hdr_found">найдено</span> &nbsp;
+    <span id="global-sent">0</span> <span data-i18n="hdr_replies">откликов</span>
     <span id="hdr-daily-counter" style="color:var(--yellow)"></span>
     <span id="hdr-filters" style="display:inline-flex;gap:3px;margin-left:4px"></span> &nbsp;
-    💾 <span id="storage-total">0</span> <span data-i18n="hdr_in_db">в базе</span> &nbsp;
-    🧪 <span id="storage-tests">0</span> <span data-i18n="hdr_tests">тестов</span>
+    <span id="storage-total">0</span> <span data-i18n="hdr_in_db">в базе</span> &nbsp;
+    <span id="storage-tests">0</span> <span data-i18n="hdr_tests">тестов</span>
   </div>
   <div id="hdr-resume-stats" style="color:var(--dim);font-size:11px;display:none">
-    👁️ <span id="hdr-views-new" class="c-cyan">0</span> <span data-i18n="hdr_new_views">новых просм.</span> &nbsp;
-    📬 <span id="hdr-inv-new" class="c-green">0</span> <span data-i18n="hdr_new_inv">новых приглаш.</span> &nbsp;
-    🔎 <span id="hdr-shows" style="color:var(--dim)">0</span> <span data-i18n="hdr_shows">показов</span>
+    <span id="hdr-views-new" class="c-cyan">0</span> <span data-i18n="hdr_new_views">новых просм.</span> &nbsp;
+    <span id="hdr-inv-new" class="c-green">0</span> <span data-i18n="hdr_new_inv">новых приглаш.</span> &nbsp;
+    <span id="hdr-shows" style="color:var(--dim)">0</span> <span data-i18n="hdr_shows">показов</span>
   </div>
-  <div id="uptime">⏱ 00:00</div>
+  <div id="uptime">00:00</div>
   <div id="dbg-err" style="display:none;color:#f85149;font-size:11px;max-width:400px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></div>
   <button id="lang-btn" onclick="toggleLang()" style="padding:4px 10px;border:1px solid var(--border);background:var(--bg-card2);color:var(--dim);cursor:pointer;border-radius:4px;font-family:inherit;font-size:11px" title="Switch language">RU</button>
-  <button id="pause-btn" onclick="sendCmd({type:'pause_toggle'})">⏸ Пауза</button>
+  <button id="pause-btn" onclick="sendCmd({type:'pause_toggle'})">Пауза</button>
   <span id="apply-mode-badge" style="padding:3px 8px;border-radius:4px;font-size:10px;font-weight:600;cursor:pointer" onclick="sendCmd({type:'set_config',key:'use_oauth_apply',value:!State.lastSnapshot?.config?.use_oauth_apply})" title="Клик — переключить метод откликов"></span>
 </div>
 
 <!-- Tabs -->
 <div id="tabs">
-  <div class="tab active" data-tab="main" data-i18n="tab_main">📊 Главная</div>
-  <div class="tab" data-tab="log" data-i18n="tab_log">📜 Лог</div>
-  <div class="tab" data-tab="applied" data-i18n="tab_applied">✅ Отклики</div>
-  <div class="tab" data-tab="tests" data-i18n="tab_tests">🧪 Тесты</div>
-  <div class="tab" data-tab="db" data-i18n="tab_db">📂 База</div>
-  <div class="tab" data-tab="hh" data-i18n="tab_hh">🎯 HH Статус</div>
-  <div class="tab" data-tab="views" data-i18n="tab_views">👁️ Просмотры</div>
-  <div class="tab" data-tab="apply" data-i18n="tab_apply">🚀 Отклик</div>
-  <div class="tab" data-tab="llm" data-i18n="tab_llm">🤖 LLM Ответы</div>
-  <div class="tab" data-tab="settings" data-i18n="tab_settings">⚙️ Настройки</div>
+  <div class="sidebar-brand">
+    <div class="sidebar-brand-title">BOT_COMMAND</div>
+    <div class="sidebar-brand-version">V4.2.0-STABLE</div>
+  </div>
+  <div class="tab active" data-tab="main" data-i18n="tab_main">Главная</div>
+  <div class="tab" data-tab="log" data-i18n="tab_log">Лог</div>
+  <div class="tab" data-tab="applied" data-i18n="tab_applied">Отклики</div>
+  <div class="tab" data-tab="tests" data-i18n="tab_tests">Тесты</div>
+  <div class="tab" data-tab="db" data-i18n="tab_db">База</div>
+  <div class="tab" data-tab="hh" data-i18n="tab_hh">HH Статус</div>
+  <div class="tab" data-tab="views" data-i18n="tab_views">Просмотры</div>
+  <div class="tab" data-tab="apply" data-i18n="tab_apply">Отклик</div>
+  <div class="tab" data-tab="llm" data-i18n="tab_llm">LLM Ответы</div>
+  <div class="tab" data-tab="settings" data-i18n="tab_settings">Настройки</div>
 </div>
 
 <!-- Main Tab -->
@@ -53,12 +57,12 @@
     <div id="sidebar">
       <!-- Global stats -->
       <div class="card" id="global-stats-card">
-        <div class="card-title" data-i18n="gs_session">📊 Сессия</div>
+        <div class="card-title" data-i18n="gs_session">Сессия</div>
         <div id="global-stats-body"></div>
       </div>
       <!-- Recent responses -->
       <div class="card" style="flex:1;overflow:hidden">
-        <div class="card-title" data-i18n="sidebar_recent">📬 Последние отклики</div>
+        <div class="card-title" data-i18n="sidebar_recent">Последние отклики</div>
         <div id="recent-list" style="overflow-y:auto;max-height:320px"></div>
       </div>
     </div>
@@ -68,15 +72,15 @@
 <!-- Log Tab -->
 <div id="panel-log" class="panel" style="padding:0">
   <div id="log-filters">
-    <input id="log-search" class="apply-input" type="text" placeholder="🔍 Поиск..." data-i18n-ph="log_search_ph" style="width:200px;font-size:11px;padding:3px 8px" oninput="renderLog(State.lastSnapshot)">
+    <input id="log-search" class="apply-input" type="text" placeholder="Поиск..." data-i18n-ph="log_search_ph" style="width:200px;font-size:11px;padding:3px 8px" oninput="renderLog(State.lastSnapshot)">
     <select id="log-acc-filter" class="apply-input" style="font-size:11px;padding:3px 6px" onchange="renderLog(State.lastSnapshot)">
       <option value="" data-i18n="log_all_accs">Все аккаунты</option>
     </select>
     <button class="log-level-btn active" data-level="" onclick="logSetLevel(this,'')" data-i18n="log_all">Все</button>
-    <button class="log-level-btn ok"   data-level="success" onclick="logSetLevel(this,'success')">✅</button>
-    <button class="log-level-btn warn" data-level="warning" onclick="logSetLevel(this,'warning')">⚠️</button>
-    <button class="log-level-btn err"  data-level="error"   onclick="logSetLevel(this,'error')">❌</button>
-    <button class="log-level-btn"      data-level="info"    onclick="logSetLevel(this,'info')">ℹ️</button>
+    <button class="log-level-btn ok"   data-level="success" onclick="logSetLevel(this,'success')">OK</button>
+    <button class="log-level-btn warn" data-level="warning" onclick="logSetLevel(this,'warning')">WARN</button>
+    <button class="log-level-btn err"  data-level="error"   onclick="logSetLevel(this,'error')">ERR</button>
+    <button class="log-level-btn"      data-level="info"    onclick="logSetLevel(this,'info')">INFO</button>
     <span id="log-count" style="font-size:11px;color:var(--dim);margin-left:auto"></span>
   </div>
   <div id="log-panel" style="padding:16px">
@@ -87,14 +91,14 @@
 <!-- Applied Tab -->
 <div id="panel-applied" class="panel">
   <div class="applied-header">
-    <div style="font-size:14px;font-weight:700"><span data-i18n="applied_title">✅ Отклики</span> <span id="applied-count" class="c-green"></span></div>
+    <div style="font-size:14px;font-weight:700"><span data-i18n="applied_title">Отклики</span> <span id="applied-count" class="c-green"></span></div>
     <div style="display:flex;gap:6px">
-      <button class="btn-refresh" onclick="exportAppliedCSV()">⬇️ CSV</button>
-      <button class="btn-refresh" onclick="loadApplied(true)">↻ Обновить</button>
+      <button class="btn-refresh" onclick="exportAppliedCSV()">CSV</button>
+      <button class="btn-refresh" onclick="loadApplied(true)">Обновить</button>
     </div>
   </div>
   <div class="applied-filters">
-    <input id="applied-search" class="apply-input" type="text" placeholder="🔍 Поиск по названию / компании..."
+    <input id="applied-search" class="apply-input" type="text" placeholder="Поиск по названию / компании..."
       data-i18n-ph="applied_search_ph" style="flex:1;min-width:180px" oninput="appliedRender()">
     <select id="applied-acc-filter" class="apply-input" style="min-width:140px" onchange="appliedRender()">
       <option value="" data-i18n="applied_all_accs">Все аккаунты</option>
@@ -125,8 +129,8 @@
 <!-- Tests Tab -->
 <div id="panel-tests" class="panel">
   <div class="applied-header">
-    <div style="font-size:14px;font-weight:700"><span data-i18n="tests_title">🧪 Вакансии с тестами</span> <span id="tests-count" class="c-magenta"></span></div>
-    <button class="btn-refresh" onclick="loadTests()">↻ Обновить</button>
+    <div style="font-size:14px;font-weight:700"><span data-i18n="tests_title">Вакансии с тестами</span> <span id="tests-count" class="c-magenta"></span></div>
+    <button class="btn-refresh" onclick="loadTests()">Обновить</button>
   </div>
   <div id="tests-panel">
     <table class="applied-table">
@@ -146,20 +150,20 @@
 <!-- DB Tab -->
 <div id="panel-db" class="panel">
   <div class="applied-header">
-    <div style="font-size:14px;font-weight:700"><span data-i18n="db_title">📂 База вакансий</span> <span id="db-count" class="c-dim"></span></div>
+    <div style="font-size:14px;font-weight:700"><span data-i18n="db_title">База вакансий</span> <span id="db-count" class="c-dim"></span></div>
     <div style="display:flex;gap:6px">
-      <button class="btn-refresh" onclick="exportDbCSV()">⬇️ CSV</button>
-      <button class="btn-refresh" onclick="loadDB(true)">↻ Обновить</button>
+      <button class="btn-refresh" onclick="exportDbCSV()">CSV</button>
+      <button class="btn-refresh" onclick="loadDB(true)">Обновить</button>
     </div>
   </div>
   <div class="applied-filters">
-    <input id="db-search" class="apply-input" type="text" placeholder="🔍 Название / компания / ID..."
+    <input id="db-search" class="apply-input" type="text" placeholder="Название / компания / ID..."
       data-i18n-ph="db_search_ph" style="flex:1;min-width:180px" oninput="dbRender()">
     <select id="db-status-filter" class="apply-input" style="min-width:160px" onchange="dbRender()">
       <option value="" data-i18n="db_all_statuses">Все статусы</option>
-      <option value="sent" data-i18n="db_status_sent">✅ Откликнулись</option>
-      <option value="test_passed" data-i18n="db_status_test_passed">📝 Тест пройден</option>
-      <option value="test_pending" data-i18n="db_status_test_pending">🧪 Тест не пройден</option>
+      <option value="sent" data-i18n="db_status_sent">Откликнулись</option>
+      <option value="test_passed" data-i18n="db_status_test_passed">Тест пройден</option>
+      <option value="test_pending" data-i18n="db_status_test_pending">Тест не пройден</option>
     </select>
     <select id="db-acc-filter" class="apply-input" style="min-width:140px" onchange="dbRender()">
       <option value="" data-i18n="db_all_accs">Все аккаунты</option>
@@ -196,7 +200,7 @@
   <!-- Resume Audit -->
   <div style="margin-bottom:20px">
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
-      <div style="font-size:15px;font-weight:700;color:var(--cyan)">🔍 Аудит резюме</div>
+      <div style="font-size:15px;font-weight:700;color:var(--cyan)">Аудит резюме</div>
       <select id="audit-acc-sel" class="apply-input" style="font-size:11px;padding:3px 8px"></select>
       <button class="btn-sm" onclick="runResumeAudit(this)">Проверить</button>
       <span id="audit-status" style="font-size:11px;color:var(--dim)"></span>
@@ -209,7 +213,7 @@
     <!-- Hot leads -->
     <div style="margin-top:16px;border-top:1px solid var(--border);padding-top:12px">
       <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">
-        <div style="font-size:14px;font-weight:700;color:var(--yellow)">🔥 Горячие лиды</div>
+        <div style="font-size:14px;font-weight:700;color:var(--yellow)">Горячие лиды</div>
         <button class="btn-sm" onclick="loadHotLeads(this)">Загрузить</button>
         <span id="leads-status" style="font-size:11px;color:var(--dim)"></span>
       </div>
@@ -218,7 +222,7 @@
     <!-- HR Contacts -->
     <div style="margin-top:16px;border-top:1px solid var(--border);padding-top:12px">
       <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">
-        <div style="font-size:14px;font-weight:700;color:var(--cyan)">📇 Контакты HR</div>
+        <div style="font-size:14px;font-weight:700;color:var(--cyan)">Контакты HR</div>
         <button class="btn-sm" onclick="loadHrContacts(this)">Загрузить</button>
         <span id="contacts-status" style="font-size:11px;color:var(--dim)"></span>
       </div>
@@ -227,7 +231,7 @@
     <!-- Remindable negotiations -->
     <div style="margin-top:16px;border-top:1px solid var(--border);padding-top:12px">
       <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">
-        <div style="font-size:14px;font-weight:700;color:var(--magenta)">🔔 Можно напомнить</div>
+        <div style="font-size:14px;font-weight:700;color:var(--magenta)">Можно напомнить</div>
         <button class="btn-sm" onclick="loadRemindable(this)">Проверить</button>
         <span id="remindable-status" style="font-size:11px;color:var(--dim)"></span>
       </div>
@@ -236,16 +240,16 @@
     <!-- OAuth API -->
     <div style="margin-top:16px;border-top:1px solid var(--border);padding-top:12px">
       <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px;flex-wrap:wrap">
-        <div style="font-size:14px;font-weight:700;color:var(--green)">🔑 OAuth API</div>
+        <div style="font-size:14px;font-weight:700;color:var(--green)">OAuth API</div>
         <button class="btn-sm" onclick="oauthGetToken(this)">Получить токен</button>
-        <button class="btn-sm" style="color:var(--cyan);border-color:var(--cyan)" onclick="oauthTouch(this)">🚀 Поднять резюме</button>
+        <button class="btn-sm" style="color:var(--cyan);border-color:var(--cyan)" onclick="oauthTouch(this)">Поднять резюме</button>
         <span id="oauth-status" style="font-size:11px;color:var(--dim)"></span>
       </div>
     </div>
     <!-- Resume cloning -->
     <div style="margin-top:16px;border-top:1px solid var(--border);padding-top:12px">
       <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">
-        <div style="font-size:14px;font-weight:700;color:var(--magenta)">📋 Резюме аккаунта</div>
+        <div style="font-size:14px;font-weight:700;color:var(--magenta)">Резюме аккаунта</div>
         <button class="btn-sm" onclick="loadAllResumes(this)">Загрузить</button>
         <span id="resumes-status" style="font-size:11px;color:var(--dim)"></span>
       </div>
@@ -275,7 +279,7 @@
 <div id="panel-apply" class="panel">
 
   <div class="apply-form">
-    <div style="font-size:15px;font-weight:700" data-i18n="apply_title">🚀 Ручной отклик</div>
+    <div style="font-size:15px;font-weight:700" data-i18n="apply_title">Ручной отклик</div>
     <div style="font-size:12px;color:var(--dim)" data-i18n="apply_desc">Введите ссылку или ID вакансии — бот проверит, нужен ли опрос, покажет вопросы и отправит отклик.</div>
 
     <div class="apply-row">
@@ -297,7 +301,7 @@
           <option value="" data-i18n="apply_tpl_ph">— выбрать шаблон —</option>
         </select>
         <button class="apply-btn-secondary" onclick="document.getElementById('apply-letter').value=''"
-          style="white-space:nowrap;padding:6px 10px" data-i18n="apply_btn_clear">✕ Очистить</button>
+          style="white-space:nowrap;padding:6px 10px" data-i18n="apply_btn_clear">Очистить</button>
       </div>
     </div>
     <div class="apply-row">
@@ -307,7 +311,7 @@
     </div>
 
     <div>
-      <button class="apply-btn" onclick="applyCheck()" data-i18n="apply_btn_check">🔍 Проверить / Откликнуться</button>
+      <button class="apply-btn" onclick="applyCheck()" data-i18n="apply_btn_check">Проверить / Откликнуться</button>
     </div>
 
     <div id="apply-result" style="display:none"></div>
@@ -318,27 +322,27 @@
 <!-- LLM Replies Tab -->
 <div id="panel-llm" class="panel" style="padding:16px">
   <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap">
-    <div style="font-size:15px;font-weight:700">🤖 LLM Авто-ответы</div>
+    <div style="font-size:15px;font-weight:700">LLM Авто-ответы</div>
     <button id="llm-global-toggle-btn" onclick="llmGlobalToggle(this)"
       style="padding:4px 14px;border-radius:4px;border:1px solid var(--dim);background:transparent;cursor:pointer;font-size:12px;color:var(--dim)">
-      ⏸ ВЫКЛ
+      ВЫКЛ
     </button>
     <select id="llm-log-acc-filter" class="apply-input" style="font-size:11px;padding:3px 6px" onchange="llmInterviewsLoad()">
       <option value="">Все аккаунты</option>
     </select>
     <select id="llm-log-sent-filter" class="apply-input" style="font-size:11px;padding:3px 6px" onchange="llmInterviewsLoad()">
       <option value="">Все статусы</option>
-      <option value="pending_reply">⏳ Ждёт ответа</option>
-      <option value="draft">📝 Черновик</option>
-      <option value="replied">✅ Отправлено</option>
+      <option value="pending_reply">Ждёт ответа</option>
+      <option value="draft">Черновик</option>
+      <option value="replied">Отправлено</option>
       <option value="no_reply_needed">— Ответ не нужен</option>
-      <option value="chat_closed">🔒 Чат закрыт</option>
-      <option value="robot">🤖 Робот-рекрутер</option>
-      <option value="waiting_hr">⏳ Ждём HR</option>
+      <option value="chat_closed">Чат закрыт</option>
+      <option value="robot">Робот-рекрутер</option>
+      <option value="waiting_hr">Ждём HR</option>
     </select>
-    <button class="btn-sm" onclick="llmInterviewsLoad()">↻ Обновить</button>
-    <button class="btn-sm" onclick="llmRunNow(this)" style="background:var(--cyan);color:#000;border-color:var(--cyan)">▶ Запустить сейчас</button>
-    <button class="btn-sm" onclick="llmResetReplied(this)" title="Очистить историю «уже отвечали» — бот повторно обработает все чаты">🔄 Сбросить историю</button>
+    <button class="btn-sm" onclick="llmInterviewsLoad()">Обновить</button>
+    <button class="btn-sm" onclick="llmRunNow(this)" style="background:var(--cyan);color:#000;border-color:var(--cyan)">Запустить сейчас</button>
+    <button class="btn-sm" onclick="llmResetReplied(this)" title="Очистить историю «уже отвечали» — бот повторно обработает все чаты">Сбросить историю</button>
     <span id="llm-log-count" style="font-size:11px;color:var(--dim);margin-left:auto"></span>
   </div>
   <!-- LLM Status bar -->
@@ -358,7 +362,7 @@
   <!-- LLM debug log -->
   <details id="llm-debug-details" style="margin-bottom:14px" open>
     <summary style="cursor:pointer;font-size:12px;color:var(--dim);user-select:none;padding:4px 0;list-style:none">
-      ▶ 🔍 Отладочный лог LLM <span id="llm-debug-count" style="font-size:11px"></span>
+      ▶ Отладочный лог LLM <span id="llm-debug-count" style="font-size:11px"></span>
     </summary>
     <div id="llm-debug-log" style="margin-top:6px;max-height:240px;overflow-y:auto;background:var(--bg);border:1px solid var(--border);border-radius:4px;padding:6px 8px;font-size:11px;font-family:monospace;display:flex;flex-direction:column;gap:2px">
       <span style="color:var(--dim)">Обновится автоматически через 300мс...</span>
@@ -393,15 +397,15 @@
   <div id="settings-panel">
 
     <!-- ═══════ ГРУППА 1: Подключение ═══════ -->
-    <div class="settings-group-header">🔌 Подключение</div>
+    <div class="settings-group-header">Подключение</div>
 
     <!-- Browser sessions -->
     <details class="q-section prio-critical" open>
-      <summary class="q-section-title" data-i18n="sec_sessions">🌐 Браузерные сессии</summary>
+      <summary class="q-section-title" data-i18n="sec_sessions">Браузерные сессии</summary>
       <div class="q-section-body">
       <div id="sess-list" style="margin-bottom:12px"></div>
       <details class="session-block" id="session-block">
-        <summary class="session-summary" data-i18n="sess_add">➕ Добавить сессию из браузера</summary>
+        <summary class="session-summary" data-i18n="sess_add">Добавить сессию из браузера</summary>
         <div class="session-body">
 
           <!-- Mode toggle -->
@@ -462,7 +466,7 @@
               placeholder="Если пусто — попытаемся найти из совпадающего аккаунта или оставим пустым"></textarea>
           </div>
           <div style="display:flex;gap:8px;margin-top:8px;align-items:center">
-            <button class="apply-btn" onclick="sessionAdd()" data-i18n="btn_connect">🔗 Подключить сессию</button>
+            <button class="apply-btn" onclick="sessionAdd()" data-i18n="btn_connect">Подключить сессию</button>
             <span id="session-status" style="font-size:12px;color:var(--dim)"></span>
           </div>
         </div>
@@ -472,7 +476,7 @@
 
     <!-- Account cookies update -->
     <details class="q-section prio-high">
-      <summary class="q-section-title" data-i18n="sec_cookies">🔑 Обновить куки аккаунтов</summary>
+      <summary class="q-section-title" data-i18n="sec_cookies">Обновить куки аккаунтов</summary>
       <div class="q-section-body">
       <div style="font-size:11px;color:var(--dim);margin-bottom:12px;line-height:1.7">
         Вставьте новый <b>cURL</b> или строку <b>cookie: hhtoken=…</b> — куки обновятся сразу без перезапуска.<br>
@@ -483,21 +487,21 @@
     </details>
 
     <!-- ═══════ ГРУППА 2: Поиск и отклики ═══════ -->
-    <div class="settings-group-header">🎯 Поиск и отклики</div>
+    <div class="settings-group-header">Поиск и отклики</div>
 
     <!-- Bot settings -->
     <details class="q-section prio-medium" open>
-      <summary class="q-section-title" data-i18n="settings_title">⚙️ Параметры бота</summary>
+      <summary class="q-section-title" data-i18n="settings_title">Параметры бота</summary>
       <div class="q-section-body">
         <div class="settings-grid" id="settings-grid"></div>
-        <button id="settings-apply" onclick="applySettings()" data-i18n="btn_apply_settings">✅ Применить</button>
+        <button id="settings-apply" onclick="applySettings()" data-i18n="btn_apply_settings">Применить</button>
         <div id="settings-status"></div>
       </div>
     </details>
 
     <!-- Work schedule filter + auto-tests -->
     <details class="q-section prio-medium">
-      <summary class="q-section-title">🏢 Фильтры и автоматизация</summary>
+      <summary class="q-section-title">Фильтры и автоматизация</summary>
       <div class="q-section-body">
         <div style="font-size:12px;font-weight:600;margin-bottom:8px;color:var(--cyan)">Умный поиск</div>
         <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px">
@@ -567,7 +571,7 @@
           </div>
         </div>
         <div style="border-top:1px solid var(--border);padding-top:12px;margin-top:12px">
-          <div style="font-size:12px;font-weight:600;margin-bottom:8px;color:var(--red)">🛑 Контроль лимитов</div>
+          <div style="font-size:12px;font-weight:600;margin-bottom:8px;color:var(--red)">Контроль лимитов</div>
           <div style="display:flex;gap:16px;align-items:center;margin-bottom:8px;flex-wrap:wrap">
             <label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer">
               Дневной лимит:
@@ -586,7 +590,7 @@
           </div>
         </div>
         <div style="border-top:1px solid var(--border);padding-top:12px;margin-top:12px">
-          <div style="font-size:12px;font-weight:600;margin-bottom:8px;color:var(--green)">🔑 Метод откликов</div>
+          <div style="font-size:12px;font-weight:600;margin-bottom:8px;color:var(--green)">Метод откликов</div>
           <label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer">
             <input type="checkbox" id="use-oauth-apply" style="accent-color:var(--green)"
                    onchange="sendCmd({type:'set_config',key:'use_oauth_apply',value:this.checked})">
@@ -601,7 +605,7 @@
 
     <!-- URL pool -->
     <details class="q-section prio-medium">
-      <summary class="q-section-title" data-i18n="sec_url_pool">🔗 Пул поисковых запросов</summary>
+      <summary class="q-section-title" data-i18n="sec_url_pool">Пул поисковых запросов</summary>
       <div class="q-section-body">
       <div style="font-size:11px;color:var(--dim);margin-bottom:12px">
         Добавьте URL-адреса поиска вакансий — они появятся как чекбоксы на карточке каждого аккаунта.
@@ -610,18 +614,18 @@
       <div id="url-pool-rows"></div>
       <div style="display:flex;gap:8px;margin-top:10px;align-items:center">
         <button class="btn-sm" onclick="urlPoolAddRow()" data-i18n="btn_add_url">＋ Добавить URL</button>
-        <button class="btn-sm" onclick="urlPoolSave(this)" data-i18n="btn_save_pool">💾 Сохранить пул</button>
+        <button class="btn-sm" onclick="urlPoolSave(this)" data-i18n="btn_save_pool">Сохранить пул</button>
         <span id="url-pool-st" style="font-size:11px;color:var(--dim)"></span>
       </div>
       </div>
     </details>
 
     <!-- ═══════ ГРУППА 3: Шаблоны ═══════ -->
-    <div class="settings-group-header">📋 Шаблоны</div>
+    <div class="settings-group-header">Шаблоны</div>
 
     <!-- Letter templates -->
     <details class="q-section prio-low">
-      <summary class="q-section-title" data-i18n="sec_letters">✉️ Шаблоны писем</summary>
+      <summary class="q-section-title" data-i18n="sec_letters">Шаблоны писем</summary>
       <div class="q-section-body">
       <div style="font-size:11px;color:var(--dim);margin-bottom:12px" data-i18n="sec_letters_desc">
         Создайте именованные шаблоны — они появятся в выпадающем списке на каждой карточке аккаунта.
@@ -629,7 +633,7 @@
       <div class="q-templates" id="lt-templates-list"></div>
       <div class="q-btn-row">
         <button class="q-btn" onclick="ltAddTemplate()" data-i18n="btn_add_template">＋ Добавить шаблон</button>
-        <button class="q-btn-save" onclick="ltSave()" data-i18n="btn_save_templates">💾 Сохранить шаблоны</button>
+        <button class="q-btn-save" onclick="ltSave()" data-i18n="btn_save_templates">Сохранить шаблоны</button>
       </div>
       <div class="q-status" id="lt-status"></div>
       </div>
@@ -637,7 +641,7 @@
 
     <!-- Questionnaire templates -->
     <details class="q-section prio-low">
-      <summary class="q-section-title" data-i18n="sec_questionnaire">📝 Шаблонные ответы на опросы</summary>
+      <summary class="q-section-title" data-i18n="sec_questionnaire">Шаблонные ответы на опросы</summary>
       <div class="q-section-body">
       <div style="font-size:11px;color:var(--dim);margin-bottom:10px" data-i18n="sec_questionnaire_desc">
         Когда вакансия требует опрос — бот автоматически заполнит его.
@@ -645,14 +649,14 @@
         Первый совпавший шаблон используется. Последний — ответ по умолчанию.
       </div>
       <div style="margin-bottom:14px;padding:10px 12px;background:var(--bg-card);border:1px solid var(--border);border-radius:6px">
-        <div style="font-size:12px;font-weight:600;margin-bottom:8px;color:var(--cyan)">🚀 Загрузить готовые пресеты</div>
+        <div style="font-size:12px;font-weight:600;margin-bottom:8px;color:var(--cyan)">Загрузить готовые пресеты</div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px">
-          <button class="btn-sm" style="color:var(--green);border-color:var(--green)" onclick="qLoadPreset('universal')">🌐 Универсальный</button>
-          <button class="btn-sm" onclick="qLoadPreset('sales')">💼 Продажи / КЦ</button>
-          <button class="btn-sm" onclick="qLoadPreset('office')">🏢 Офис / Администратор</button>
-          <button class="btn-sm" onclick="qLoadPreset('remote')">🏠 Удалёнка / IT</button>
+          <button class="btn-sm" style="color:var(--green);border-color:var(--green)" onclick="qLoadPreset('universal')">Универсальный</button>
+          <button class="btn-sm" onclick="qLoadPreset('sales')">Продажи / КЦ</button>
+          <button class="btn-sm" onclick="qLoadPreset('office')">Офис / Администратор</button>
+          <button class="btn-sm" onclick="qLoadPreset('remote')">Удалёнка / IT</button>
         </div>
-        <div style="font-size:11px;color:var(--dim)">⚠️ Заменит текущие шаблоны. Отредактируй ответы под себя и нажми «Сохранить».</div>
+        <div style="font-size:11px;color:var(--dim)">Заменит текущие шаблоны. Отредактируй ответы под себя и нажми «Сохранить».</div>
       </div>
       <div class="q-templates" id="q-templates-list"></div>
       <div class="q-default-row">
@@ -662,25 +666,25 @@
       </div>
       <div class="q-btn-row">
         <button class="q-btn" onclick="qAddTemplate()" data-i18n="btn_add_template">＋ Добавить шаблон</button>
-        <button class="q-btn-save" onclick="qSave()" data-i18n="btn_save_templates">💾 Сохранить шаблоны</button>
+        <button class="q-btn-save" onclick="qSave()" data-i18n="btn_save_templates">Сохранить шаблоны</button>
       </div>
       <div class="q-status" id="q-status"></div>
       </div>
     </details>
 
     <!-- ═══════ ГРУППА 4: AI ═══════ -->
-    <div class="settings-group-header">🤖 AI / LLM</div>
+    <div class="settings-group-header">AI / LLM</div>
 
     <!-- LLM auto-reply -->
     <details class="q-section prio-low" id="llm-section">
-      <summary class="q-section-title">🤖 LLM Авто-ответы</summary>
+      <summary class="q-section-title">LLM Авто-ответы</summary>
       <div class="q-section-body">
       <div style="font-size:11px;color:var(--dim);margin-bottom:12px;line-height:1.7">
         Бот будет автоматически отвечать на сообщения работодателей в переговорах со статусом <b>Интервью</b>.
         Используется OpenAI-совместимый API (GPT-4o-mini, DeepSeek и др.)
       </div>
       <div style="font-size:11px;color:var(--cyan);margin-bottom:10px">
-        💡 Включить/выключить авто-ответы — кнопка во вкладке <b>🤖 LLM Ответы</b>
+        Включить/выключить авто-ответы — кнопка во вкладке <b>LLM Ответы</b>
       </div>
       <div style="display:flex;gap:14px;margin-bottom:8px;align-items:center;flex-wrap:wrap">
         <label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer">
@@ -700,7 +704,7 @@
         <label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer">
           <input type="checkbox" id="llm-fill-questionnaire" style="accent-color:var(--purple,#c084fc)"
                  onchange="sendCmd({type:'set_config',key:'llm_fill_questionnaire',value:this.checked})">
-          📝 Заполнять опросники нейронкой (textarea + radio + checkbox при откликах)
+          Заполнять опросники нейронкой (textarea + radio + checkbox при откликах)
         </label>
         <div style="font-size:11px;color:var(--dim);margin-top:4px;margin-left:22px">
           Если включено — LLM сам отвечает на вопросы работодателя при отклике. Шаблоны используются как запасной вариант.
@@ -712,19 +716,19 @@
         </div>
         <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
           <select id="llm-resume-acc-sel" class="apply-input" style="font-size:11px;padding:3px 6px"></select>
-          <button class="btn-sm" onclick="llmPreviewResume(this)">📄 Загрузить резюме</button>
+          <button class="btn-sm" onclick="llmPreviewResume(this)">Загрузить резюме</button>
           <span id="llm-resume-status" style="font-size:11px;color:var(--dim)"></span>
         </div>
         <pre id="llm-resume-preview" style="display:none;margin-top:8px;padding:10px;background:var(--bg);border:1px solid var(--border);border-radius:4px;font-size:11px;white-space:pre-wrap;max-height:220px;overflow-y:auto;color:var(--fg)"></pre>
       </div>
       <div style="margin-bottom:12px">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-          <div style="font-size:12px;font-weight:600">🔑 API профили</div>
+          <div style="font-size:12px;font-weight:600">API профили</div>
           <div style="display:flex;gap:8px;align-items:center">
             <label style="font-size:11px;color:var(--dim)">Режим:</label>
             <select id="llm-profile-mode" class="apply-input" style="font-size:11px;padding:2px 6px">
-              <option value="fallback">⬇️ Резерв (первый рабочий)</option>
-              <option value="roundrobin">🔁 По очереди</option>
+              <option value="fallback">Резерв (первый рабочий)</option>
+              <option value="roundrobin">По очереди</option>
             </select>
           </div>
         </div>
@@ -737,46 +741,46 @@
         <textarea id="llm-system-prompt" class="apply-input" rows="4" style="font-size:11px"></textarea>
       </div>
       <div style="display:flex;gap:8px;align-items:center">
-        <button class="btn-sm" onclick="llmSave(this)">💾 Сохранить</button>
+        <button class="btn-sm" onclick="llmSave(this)">Сохранить</button>
         <span id="llm-status" style="font-size:11px;color:var(--dim)"></span>
       </div>
       </div>
     </details>
 
     <!-- ═══════ ГРУППА 5: Продвинутое ═══════ -->
-    <div class="settings-group-header">🔧 Продвинутое</div>
+    <div class="settings-group-header">Продвинутое</div>
 
     <!-- JSON Editor -->
     <details class="q-section prio-low">
-      <summary class="q-section-title">📋 JSON-редактор</summary>
+      <summary class="q-section-title">JSON-редактор</summary>
       <div class="q-section-body">
       <div style="font-size:11px;color:var(--dim);margin-bottom:10px">
         Прямое редактирование конфигов. Изменения применяются сразу после сохранения.
       </div>
       <details class="session-block" id="json-config-details">
-        <summary class="session-summary">⚙️ config.json</summary>
+        <summary class="session-summary">config.json</summary>
         <div class="session-body">
           <textarea id="json-config-ta" class="apply-input" rows="16"
             style="font-family:monospace;font-size:11px;white-space:pre" spellcheck="false"></textarea>
           <div style="display:flex;gap:8px;margin-top:8px;align-items:center">
-            <button class="btn-sm" onclick="jsonConfigLoad(this)">↻ Обновить</button>
-            <button class="btn-sm" onclick="jsonConfigTemplate()">📋 Шаблон</button>
+            <button class="btn-sm" onclick="jsonConfigLoad(this)">Обновить</button>
+            <button class="btn-sm" onclick="jsonConfigTemplate()">Шаблон</button>
             <button class="btn-sm" style="color:var(--green);border-color:var(--green)"
-              onclick="jsonConfigSave(this)">💾 Сохранить</button>
+              onclick="jsonConfigSave(this)">Сохранить</button>
             <span id="json-config-st" style="font-size:11px;color:var(--dim)"></span>
           </div>
         </div>
       </details>
       <details class="session-block" id="json-accounts-details" style="margin-top:8px">
-        <summary class="session-summary">👤 accounts.json</summary>
+        <summary class="session-summary">accounts.json</summary>
         <div class="session-body">
           <textarea id="json-accounts-ta" class="apply-input" rows="16"
             style="font-family:monospace;font-size:11px;white-space:pre" spellcheck="false"></textarea>
           <div style="display:flex;gap:8px;margin-top:8px;align-items:center">
-            <button class="btn-sm" onclick="jsonAccountsLoad(this)">↻ Обновить</button>
-            <button class="btn-sm" onclick="jsonAccountsTemplate()">📋 Шаблон</button>
+            <button class="btn-sm" onclick="jsonAccountsLoad(this)">Обновить</button>
+            <button class="btn-sm" onclick="jsonAccountsTemplate()">Шаблон</button>
             <button class="btn-sm" style="color:var(--green);border-color:var(--green)"
-              onclick="jsonAccountsSave(this)">💾 Сохранить</button>
+              onclick="jsonAccountsSave(this)">Сохранить</button>
             <span id="json-accounts-st" style="font-size:11px;color:var(--dim)"></span>
           </div>
         </div>
@@ -787,6 +791,6 @@
   </div>
 </div>
 
-<script src="/static/js/app.js"></script>
+<script src="./js/app.js?v=2"></script>
 </body>
 </html>

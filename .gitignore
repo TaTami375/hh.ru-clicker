@@ -1,5 +1,6 @@
 # Данные пользователя
 data/
+docs/
 
 # Секреты — никогда не коммитить
 .env
@@ -20,6 +21,7 @@ build/
 # IDE
 .vscode/
 .idea/
+.windsurf/
 *.swp
 *.swo
 *~
