@@ -9,7 +9,9 @@ COPY web_app.py .
 COPY app/ app/
 COPY static/ static/
 
-# Папка data монтируется через volume
+# Папка data монтируется через внешний volume (данные сохраняются между деплоями)
+VOLUME ["/app/data"]
+
 RUN mkdir -p data \
     && addgroup --system appgroup \
     && adduser --system --ingroup appgroup appuser \
